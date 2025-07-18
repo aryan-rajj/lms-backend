@@ -4,6 +4,7 @@ import crypto from "crypto";
 import { razorpay } from "../server.js";
 import Payment from "../models/payment.model.js";
 const getRazorpayKey = async (req, res, next) => {
+  console.log("first");
   res.status(200).json({
     success: true,
     message: "Razorpay API key",
@@ -13,6 +14,7 @@ const getRazorpayKey = async (req, res, next) => {
 const buySubscription = async (req, res, next) => {
   const { id } = req.user;
   const user = await User.findById(id);
+  console.log("second");
   if (!user) {
     return next(new AppError("Unauthorized, please login"));
   }
@@ -35,73 +37,79 @@ const buySubscription = async (req, res, next) => {
   });
 };
 const cancelSubscription = async (req, res, next) => {
-  const { id } = req.user;
-  const user = await User.findById(id);
-  if (!user) {
-    return next(new AppError("user not found for cancel subscription", 500));
+  try {
+    const { id } = req.user;
+    const user = await User.findById(id);
+    if (!user) {
+      return next(new AppError("User not found for cancel subscription", 500));
+    }
+    if (user.role === "ADMIN") {
+      return next(new AppError("Admin cannot cancel any course", 500));
+    }
+    if (!user.subscription.id) {
+      return next(new AppError("User has no active subscription", 400));
+    }
+
+    const subscriptionId = user.subscription.id;
+
+    const subscription = await razorpay.subscriptions.cancel(subscriptionId);
+    user.subscription.id = subscription.id;
+    user.subscription.status = subscription.status;
+    await user.save();
+
+    const payment = await Payment.findOne({
+      razorpay_subscription_id: subscriptionId,
+    });
+    if (!payment) {
+      return next(new AppError("Payment record not found", 400));
+    }
+
+    const timeSinceSubscribed = Date.now() - payment.createdAt;
+    const refundPeriod = 14 * 24 * 60 * 60 * 1000;
+
+    if (timeSinceSubscribed > refundPeriod) {
+      return next(
+        new AppError("Refund period is over, no refunds will be provided.", 400)
+      );
+    }
+
+    await razorpay.payments.refund(payment.razorpay_payment_id, {
+      speed: "optimum",
+    });
+
+    user.subscription.id = undefined;
+    user.subscription.status = "Inactive";
+    await user.save();
+    await payment.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: "Subscription canceled successfully",
+    });
+  } catch (err) {
+    console.error("Cancel Subscription error:", err);
+    next(err);
   }
-  if (user.role !== "ADMIN") {
-    return next(new AppError("Admin cannot cancel any course", 500));
-  }
-  const subscriptionId = use.subscription.id;
-
-  const subscription = await razorpay.subscriptions.cancel(subscriptionId);
-  user.subscription.id = subscription.id;
-  user.subscription.status = subscription.status;
-  await user.save();
-
-  //payment details
-  const payment = await Payment.findOne({
-    razorpay_subscription_id: subscriptionId,
-  });
-  const timeSinceSubscribed = Date.now() - payment.createdAt;
-  // refund period which in our case is 14 days
-  const refundPeriod = 14 * 24 * 60 * 60 * 1000;
-
-  // Check if refund period has expired or not
-  if (refundPeriod <= timeSinceSubscribed) {
-    return next(
-      new AppError(
-        "Refund period is over, so there will not be any refunds provided.",
-        400
-      )
-    );
-  }
-
-  // If refund period is valid then refund the full amount that the user has paid
-  await razorpay.payments.refund(payment.razorpay_payment_id, {
-    speed: "optimum", // This is required
-  });
-
-  user.subscription.id = undefined; // Remove the subscription ID from user DB
-  user.subscription.status = undefined; // Change the subscription Status in user DB
-
-  await user.save();
-  await payment.remove();
-
-  // Send the response
-  res.status(200).json({
-    success: true,
-    message: "Subscription canceled successfully",
-  });
 };
 
 const verifyPayment = async (req, res, next) => {
   const { id } = req.user;
+  console.log(id);
   const { razorpay_payment_id, razorpay_subscription_id, razorpay_signature } =
     req.body;
-  const user = User.findById(id);
-  const subscriptionId = user.subscription.id;
-  if (!user) {
-    return next(new AppError("user not found", 400));
+  const user = await User.findById(id);
+
+  if (!user || !user.subscription) {
+    return next(new AppError("User or subscription not found", 400));
   }
+  const subscriptionId = user.subscription.id;
   const generateSignature = crypto
     .createHmac("sha256", process.env.RAZORPAY_SECRET)
     .update(`${razorpay_payment_id}|${subscriptionId}`)
     .digest("hex");
 
   if (generateSignature !== razorpay_signature) {
-    return next(new AppError("payment unssucssefull", 500));
+    return next(new AppError("Payment not verified, please try again.", 500));
   }
   //If they match create payment and store it in the DB
   await Payment.create({

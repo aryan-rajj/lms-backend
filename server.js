@@ -9,10 +9,9 @@ v2.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-
 // Creating the razorpay secret
 export const razorpay=new Razorpay({
-  key_id:process.env.Razorpay_KEY_ID,
+  key_id:process.env.RAZORPAY_KEY_ID,
   key_secret:process.env.RAZORPAY_SECRET,
 })
 

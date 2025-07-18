@@ -9,26 +9,32 @@ import errorMiddleware from "./middlewares/errorMiddlewares.js";
 import paymentRoutes from "./routes/payment.routes.js";
 config();
 const app = express();
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-app.use(cors());
-app.use(morgan("dev"));
 app.use(
   cors({
     origin: [process.env.FRONTEND_URL],
     credentials: true,
   })
 );
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(morgan("dev"));
+
 app.use("/ping", (req, res) => {
   res.send("Pong");
 });
 
+
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/courses", courseRoutes);
 app.use("/api/v1/payment", paymentRoutes);
-
+app.post("/api/v1/user/contact", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Contact mat karo!!",
+    req,
+  });
+});
 app.use((req, res) => {
   res.status(400).json({
     message: "Page not found",

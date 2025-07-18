@@ -1,16 +1,18 @@
+import fs from "fs/promises";
+import path from "path";
 import Course from "../models/course.model.js";
 import AppError from "../utils/app.error.js";
-
+import cloudinary from "cloudinary";
 const getAllCourses = async (req, res, next) => {
   try {
-    const course = await Course.find({}).select("-leactures");
-    if (!course) {
+    const courses = await Course.find({}).select("-lectures");
+    if (!courses) {
       return next(new AppError("There are no course available", 400));
     }
     res.status(200).json({
       success: true,
       message: "All courses are listed here",
-      course,
+      courses,
     });
   } catch (e) {
     return next(new AppError(e.message, 400));
@@ -34,47 +36,118 @@ const getLeactureByCourseId = async (req, res, next) => {
   }
 };
 const createCourse = async (req, res, next) => {
-  try {
-    const { title, description, createdBy, category } = req.body;
-    if (!title || !description || !createdBy || !category) {
-      return next(new AppError("Some field are missing, pls try again", 500));
-    }
-    const course = await Course.create({
-      title,
-      description,
-      createdBy,
-      category,
-    });
-    if (!course) {
-      return next(new AppError("course was not created", 500));
-    }
+  const { title, description, category, createdBy } = req.body;
 
-    if (req.file) {
+  if (!title || !description || !category || !createdBy) {
+    return next(new AppError("All fields are required", 400));
+  }
+
+  const course = await Course.create({
+    title,
+    description,
+    category,
+    createdBy,
+  });
+
+  if (!course) {
+    return next(
+      new AppError("Course could not be created, please try again", 400)
+    );
+  }
+
+  // Run only if user sends a file
+  if (req.file) {
+    try {
       const result = await cloudinary.v2.uploader.upload(req.file.path, {
         folder: "lms", // Save files in a folder named lms
       });
+
+      // If success
+      if (result) {
+        // Set the public_id and secure_url in array
+        course.thumbnail.public_id = result.public_id;
+        course.thumbnail.secure_url = result.secure_url;
+      }
+
+      // After successful upload remove the file from local storage
+      fs.rm(`uploads/${req.file.filename}`);
+    } catch (error) {
+      // Empty the uploads directory without deleting the uploads directory
+      for (const file of await fs.readdir("uploads/")) {
+        await fs.unlink(path.join("uploads/", file));
+      }
+
+      // Send the error message
+      return next(
+        new AppError(
+          JSON.stringify(error) || "File not uploaded, please try again",
+          400
+        )
+      );
     }
-    if (result) {
-      course.thumbnail.public_id = result.public_id;
-      course.thumbnail.secure_url = result.secure_url;
-    }
-    fs.remove(`/uploads/${req.file.filename}`);
-  } catch (e) {
-    return next(
-      new AppError(
-        JSON.stringify(e) || "File not uploaded, please try again",
-        400
-      )
-    );
   }
+
+  // Save the changes
   await course.save();
 
-  res.status(200).json({
+  res.status(201).json({
     success: true,
     message: "Course created successfully",
     course,
   });
 };
+// const createCourse = async (req, res, next) => {
+//   try {
+//     const { title, description, createdBy, category } = req.body;
+
+//     if (!title || !description || !createdBy || !category) {
+//       return next(
+//         new AppError("Some fields are missing, please try again", 400)
+//       );
+//     }
+
+//     let result;
+//     if (req.file) {
+//       console.log("Uploaded file:", req.file);
+//       console.log(req.file.path);
+//       result = await cloudinary.v2.uploader.upload(req.file.path, {
+//         folder: "lms",
+//       });
+//       // Remove file after upload
+//       fs.removeSync(req.file.path);
+//     }
+//     console.log(result);
+
+//     const course = await Course.create({
+//       title,
+//       description,
+//       createdBy,
+//       category,
+//       thumbnail: {
+//         public_id: result ? result.public_id : "",
+//         secure_url: result ? result.secure_url : "",
+//       },
+//     });
+
+//     if (!course) {
+//       return next(new AppError("Course was not created", 500));
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Course created successfully",
+//       course,
+//     });
+//   } catch (e) {
+//     return next(
+//       new AppError(
+//         JSON.stringify(e) || "File not uploaded, please try again",
+//         400
+//       )
+//     );
+//   }
+// };
+
 const removeCourseById = async (req, res, next) => {
   const { id } = req.params;
   const course = await Course.findById(id);

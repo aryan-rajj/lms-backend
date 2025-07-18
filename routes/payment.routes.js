@@ -13,6 +13,6 @@ router.route("/razorpay-key").get(isLoggedIn,getRazorpayKey);
 router.route("/subscribe").post(isLoggedIn,buySubscription);
 router.route("/unsubscribe").post(isLoggedIn,isSubscribed,cancelSubscription);
 router.route("/").get(isLoggedIn,isSubscribed,allPayment);
-router.route("/verify").post(verifyPayment);
+router.route("/verify").post(isLoggedIn,verifyPayment);
 
 export default router;
