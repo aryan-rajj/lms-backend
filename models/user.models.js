@@ -2,6 +2,7 @@ import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 import JWT from "jsonwebtoken";
 import crypto from "crypto";
+import { type } from "os";
 
 const userSchema = new Schema(
   {
@@ -48,7 +49,10 @@ const userSchema = new Schema(
     },
     subscription:{
       id:String,
-      status:String,
+      status:{
+        type:String,
+        default:"inactive"
+      }
     }
   },
   {

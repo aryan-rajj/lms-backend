@@ -27,6 +27,7 @@ const buySubscription = async (req, res, next) => {
     customer_notify: 1, // 1 means razorpay will handle notifying the customer, 0 means we will not notify the customer
     total_count: 12, // 12 means it will charge every month for a 1-year sub.
   });
+  console.log(subscription);
   user.subscription.id = subscription.id;
   user.subscription.status = subscription.status;
   await user.save();
