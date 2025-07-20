@@ -203,13 +203,12 @@ const addLeactureToCourseById = async (req, res, next) => {
         chunk_size: 500000000, // 100 mb size
         resource_type: "video", // Save files in a folder named lms
       });
-      console.log(result);
       if (result) {
         lectureData.public_id = result.public_id;
         lectureData.secure_url = result.secure_url;
       }
       try {
-        await fs.rm(path.join(__dirname, "../uploads", req.file.filename));
+        await  fs.rm(`uploads/${req.file.filename}`);
       } catch (e) {
         console.error("File removal error:", e.message);
       }

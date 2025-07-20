@@ -2,6 +2,8 @@ import app from './app.js';
 import connectionToDB from './config/connectionToDB.js';
 import { v2 } from 'cloudinary';
 import Razorpay from 'razorpay';
+import dotenv from "dotenv";
+dotenv.config();
 const port=process.env.PORT || 5000;
 
 v2.config({
