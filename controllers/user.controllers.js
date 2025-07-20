@@ -8,6 +8,9 @@ const cookieOptions = {
   //   secure: process.env.NODE_ENV === 'production' ? true : false,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   httpOnly: true,
+  secure: true, // ✅ required on Render (HTTPS)
+  sameSite: "None", // ✅ required when frontend + backend are on different domains
+  // maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 const register = async (req, res, next) => {
   const { fullName, email, password } = req.body;
@@ -28,7 +31,7 @@ const register = async (req, res, next) => {
       secure_url:
         "https://res.cloudinary.com/du9jzqlpt/image/upload/v1674647316/avatar_drzgxv.jpg",
     },
-    role:"ADMIN",
+    role: "ADMIN",
   });
   if (!user) {
     return next(
@@ -138,7 +141,7 @@ const forgotPassword = async (req, res, next) => {
   <br/>
   <p>If you did not request this, please ignore this email.</p>
 `;
-await user.save();
+  await user.save();
   try {
     await sendEmail(email, subject, message);
     res.status(200).json({
@@ -235,7 +238,7 @@ const changePassword = async (req, res, next) => {
 };
 const updateProfile = async (req, res, next) => {
   const { fullName } = req.body;
-  const {id} = req.params;
+  const { id } = req.params;
   const user = await User.findById(id);
 
   if (!user) {
