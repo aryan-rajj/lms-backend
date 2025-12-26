@@ -23,8 +23,12 @@ app.use(morgan("dev"));
 app.use("/ping", (req, res) => {
   res.send("Pong");
 });
-
-
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "LMS Backend is running 🚀"
+  });
+});
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/courses", courseRoutes);
 app.use("/api/v1/payment", paymentRoutes);
