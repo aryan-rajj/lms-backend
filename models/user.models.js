@@ -1,5 +1,4 @@
 import { Schema, model } from "mongoose";
-import bcrypt from "bcrypt";
 import bcrypt from "bcryptjs";
 import JWT from "jsonwebtoken";
 import crypto from "crypto";
