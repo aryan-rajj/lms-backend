@@ -8,9 +8,14 @@ const cookieOptions = {
   //   secure: process.env.NODE_ENV === 'production' ? true : false,
   httpOnly: true,
   secure: true, // ✅ required on Render (HTTPS)
+<<<<<<< HEAD
   sameSite: "none", 
   maxAge: 7 * 24 * 60 * 60 * 1000// 7 days// ✅ required when frontend + backend are on different domains
   // maxAge: 7 * 24 * 60 * 60 * 1000,
+=======
+  sameSite: "none", // ✅ required when frontend + backend are on different domains
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+>>>>>>> 0d89d58 (some changes in schema model.js code)
 };
 const register = async (req, res, next) => {
   const { fullName, email, password } = req.body;
@@ -31,7 +36,10 @@ const register = async (req, res, next) => {
       secure_url:
         "https://res.cloudinary.com/du9jzqlpt/image/upload/v1674647316/avatar_drzgxv.jpg",
     },
+<<<<<<< HEAD
     role: "ADMIN",
+=======
+>>>>>>> 0d89d58 (some changes in schema model.js code)
   });
   if (!user) {
     return next(
@@ -72,7 +80,10 @@ const register = async (req, res, next) => {
     user,
   });
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0d89d58 (some changes in schema model.js code)
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -82,8 +93,12 @@ const login = async (req, res, next) => {
     }
 
     const user = await User.findOne({ email }).select("+password");
+<<<<<<< HEAD
 
     // ✅ FIXED CONDITION
+=======
+    
+>>>>>>> 0d89d58 (some changes in schema model.js code)
     if (!user || !(await user.comparePassword(password))) {
       return next(new AppError("Email or password does not match", 401));
     }
@@ -104,6 +119,10 @@ const login = async (req, res, next) => {
   }
 };
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0d89d58 (some changes in schema model.js code)
 const logout = (req, res, next) => {
   // in logout setting the cookie value to null
   res.cookie("token", null, {
@@ -116,6 +135,10 @@ const logout = (req, res, next) => {
     message: "User logged out successfully",
   });
 };
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0d89d58 (some changes in schema model.js code)
 const getProfile = async (req, res, next) => {
   const user = await User.findById(req.user.id);
 
@@ -125,6 +148,10 @@ const getProfile = async (req, res, next) => {
     user,
   });
 };
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0d89d58 (some changes in schema model.js code)
 const forgotPassword = async (req, res, next) => {
   const { email } = req.body;
   if (!email) {

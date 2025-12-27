@@ -23,12 +23,17 @@ app.use(morgan("dev"));
 app.use("/ping", (req, res) => {
   res.send("Pong");
 });
+<<<<<<< HEAD
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
     message: "LMS Backend is running 🚀"
   });
 });
+=======
+
+
+>>>>>>> 0d89d58 (some changes in schema model.js code)
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/courses", courseRoutes);
 app.use("/api/v1/payment", paymentRoutes);

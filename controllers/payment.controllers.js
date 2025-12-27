@@ -11,6 +11,10 @@ const getRazorpayKey = async (req, res, next) => {
     key: process.env.RAZORPAY_KEY_ID,
   });
 };
+<<<<<<< HEAD
+=======
+// 4718 6091 0820 4366
+>>>>>>> 0d89d58 (some changes in schema model.js code)
 const buySubscription = async (req, res, next) => {
   const { id } = req.user;
   const user = await User.findById(id);
