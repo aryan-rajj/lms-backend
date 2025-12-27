@@ -6,10 +6,10 @@ import sendEmail from "../utils/send.email.js";
 import crypto from "crypto";
 const cookieOptions = {
   //   secure: process.env.NODE_ENV === 'production' ? true : false,
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   httpOnly: true,
   secure: true, // ✅ required on Render (HTTPS)
-  sameSite: "None", // ✅ required when frontend + backend are on different domains
+  sameSite: "none", 
+  maxAge: 7 * 24 * 60 * 60 * 1000// 7 days// ✅ required when frontend + backend are on different domains
   // maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 const register = async (req, res, next) => {
@@ -76,26 +76,31 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password) {
-      return next(new AppError("email or password left blank or invalid", 400));
+      return next(new AppError("Email or password is required", 400));
     }
+
     const user = await User.findOne({ email }).select("+password");
-    if (!user && (await user.comparePassword(password))) {
-      return next(new AppError("email or password does not match", 404));
+
+    // ✅ FIXED CONDITION
+    if (!user || !(await user.comparePassword(password))) {
+      return next(new AppError("Email or password does not match", 401));
     }
-    const token = await user.generateJWTToken();
+
+    const token = user.generateJWTToken();
+
     user.password = undefined;
-    if (!token) {
-      return next(new AppError("invalid token", 404));
-    }
+
     res.cookie("token", token, cookieOptions);
+
     res.status(200).json({
       success: true,
-      message: "user looged in successfully",
+      message: "User logged in successfully",
       user,
     });
-  } catch (e) {
-    return next(new AppError(e.message, 404));
+  } catch (error) {
+    return next(new AppError(error.message, 500));
   }
 };
 
