@@ -1,9 +1,6 @@
 import { Schema, model } from "mongoose";
-<<<<<<< HEAD
 import bcrypt from "bcrypt";
-=======
 import bcrypt from "bcryptjs";
->>>>>>> 0d89d58 (some changes in schema model.js code)
 import JWT from "jsonwebtoken";
 import crypto from "crypto";
 import { type } from "os";
@@ -29,10 +26,7 @@ const userSchema = new Schema(
       required: [true, "Password is required"],
       minlength: [8, "password at least be of 8 characters"],
       trim: true,
-<<<<<<< HEAD
       lowercase: true,
-=======
->>>>>>> 0d89d58 (some changes in schema model.js code)
       select: false,
     },
     avatar: {
@@ -54,7 +48,6 @@ const userSchema = new Schema(
     forgotPasswordExpiry: {
       type: Date,
     },
-<<<<<<< HEAD
     subscription:{
       id:String,
       status:{
@@ -62,7 +55,6 @@ const userSchema = new Schema(
         default:"inactive"
       }
     }
-=======
     subscription: {
       id: String,
       status: {
@@ -70,13 +62,11 @@ const userSchema = new Schema(
         default: "inactive",
       },
     },
->>>>>>> 0d89d58 (some changes in schema model.js code)
   },
   {
     timestamps: true,
   }
 );
-<<<<<<< HEAD
 userSchema.pre("save", async function (req, res, next) {
   if (!this.isModified("password")) {
     return next;
@@ -84,7 +74,6 @@ userSchema.pre("save", async function (req, res, next) {
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-=======
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     return next();
@@ -92,7 +81,6 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
->>>>>>> 0d89d58 (some changes in schema model.js code)
 userSchema.methods = {
   generateJWTToken: function () {
     return JWT.sign({ id: this.id, role: this.role }, process.env.JWT_SECRET, {
