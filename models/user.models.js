@@ -54,24 +54,11 @@ const userSchema = new Schema(
         default:"inactive"
       }
     }
-    subscription: {
-      id: String,
-      status: {
-        type: String,
-        default: "inactive",
-      },
-    },
   },
   {
     timestamps: true,
   }
 );
-userSchema.pre("save", async function (req, res, next) {
-  if (!this.isModified("password")) {
-    return next;
-  }
-  this.password = await bcrypt.hash(this.password, 10);
-});
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
@@ -80,6 +67,7 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
+
 userSchema.methods = {
   generateJWTToken: function () {
     return JWT.sign({ id: this.id, role: this.role }, process.env.JWT_SECRET, {
