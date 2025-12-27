@@ -9,9 +9,7 @@ const cookieOptions = {
   httpOnly: true,
   secure: true, // ✅ required on Render (HTTPS)
   sameSite: "none", 
-  maxAge: 7 * 24 * 60 * 60 * 1000// 7 days// ✅ required when frontend + backend are on different domains
-  sameSite: "none", // ✅ required when frontend + backend are on different domains
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  maxAge: 7 * 24 * 60 * 60 * 1000,// 7 days
 };
 const register = async (req, res, next) => {
   const { fullName, email, password } = req.body;
