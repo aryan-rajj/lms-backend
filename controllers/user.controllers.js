@@ -11,7 +11,6 @@ const cookieOptions = {
     secure: true,      // REQUIRED for production (HTTPS)
     sameSite: 'none'   // REQUIRED because Frontend & Backend are on different domains
 };
-res.cookie('token', token, cookieOptions);
 
 const register = async (req, res, next) => {
   const { fullName, email, password } = req.body;
