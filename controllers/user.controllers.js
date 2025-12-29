@@ -31,7 +31,7 @@ const register = async (req, res, next) => {
       secure_url:
         "https://res.cloudinary.com/du9jzqlpt/image/upload/v1674647316/avatar_drzgxv.jpg",
     },
-    role: "ADMIN",
+    role: "USER",
   });
   if (!user) {
     return next(
