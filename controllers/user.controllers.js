@@ -4,13 +4,15 @@ import cloudinary from "cloudinary";
 import fs from "fs/promises";
 import sendEmail from "../utils/send.email.js";
 import crypto from "crypto";
+
 const cookieOptions = {
-  //   secure: process.env.NODE_ENV === 'production' ? true : false,
-  httpOnly: true,
-  secure: true, // ✅ required on Render (HTTPS)
-  sameSite: "none", 
-  maxAge: 7 * 24 * 60 * 60 * 1000,// 7 days
+    expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    httpOnly: true,
+    secure: true,      // REQUIRED for production (HTTPS)
+    sameSite: 'none'   // REQUIRED because Frontend & Backend are on different domains
 };
+res.cookie('token', token, cookieOptions);
+
 const register = async (req, res, next) => {
   const { fullName, email, password } = req.body;
   if (!fullName || !email || !password) {
@@ -102,12 +104,11 @@ const login = async (req, res, next) => {
   }
 };
 const logout = (req, res, next) => {
-  // in logout setting the cookie value to null
   res.cookie("token", null, {
-    maxAge: 0,
-    httpOnly: true,
+    ...cookieOptions, // Use the same options (secure, sameSite)
+    maxAge: 0,        // Immediately expire
   });
-  //sending the messages
+
   res.status(200).json({
     success: true,
     message: "User logged out successfully",
