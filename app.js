@@ -9,12 +9,11 @@ import errorMiddleware from "./middlewares/errorMiddlewares.js";
 import paymentRoutes from "./routes/payment.routes.js";
 config();
 const app = express();
-app.use(
-  cors({
-    origin: [process.env.FRONTEND_URL],
+app.use(cors({
+    origin: process.env.FRONTEND_URL, // Set this to your Vercel URL in Render Dashboard
     credentials: true,
-  })
-);
+    methods: ["GET", "POST", "PUT", "DELETE"]
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
