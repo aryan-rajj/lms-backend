@@ -25,7 +25,7 @@ const userSchema = new Schema(
       required: [true, "Password is required"],
       minlength: [8, "password at least be of 8 characters"],
       trim: true,
-      lowercase: true,
+      // REMOVED lowercase: true here
       select: false,
     },
     avatar: {
