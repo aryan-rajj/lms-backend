@@ -83,12 +83,12 @@ const login = async (req, res, next) => {
 
     const user = await User.findOne({ email }).select("+password");
 
+    // This check will now work because password casing is preserved
     if (!user || !(await user.comparePassword(password))) {
       return next(new AppError("Email or password does not match", 401));
     }
 
     const token = user.generateJWTToken();
-
     user.password = undefined;
 
     res.cookie("token", token, cookieOptions);
